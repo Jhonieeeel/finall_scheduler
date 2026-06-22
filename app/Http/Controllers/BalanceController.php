@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Actions\Balance\MonthlyAccrual;
 use App\Data\LeaveData;
 use App\Models\Leave;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,11 +17,8 @@ class BalanceController extends Controller
      */
     public function index()
     {
-        $month = request()->input('month', now()->month);
-        $year = request()->input('year', now()->year);
-        $date = Carbon::create($year, $month);
-        $balances = Leave::replay($date);
-        return Inertia::render("Balance/BalanceIndex", ['balances' => $balances]);
+        $users = User::select(['id', 'name'])->get();
+        return Inertia::render("Balance/BalanceIndex", ['users' => $users]);
     }
 
     /**
@@ -43,9 +41,27 @@ class BalanceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $user)
     {
-        //
+        $month = request()->input('month', now()->month);
+        $year  = request()->input('year', now()->year);
+
+        return Inertia::render("Balance/UserBalance", ['user' => $user, 'date' => Carbon::create($year, $month)]);
+    }
+
+    public function data(User $user)
+    {
+        $month = request()->input('month', now()->month);
+        $year  = request()->input('year', now()->year);
+        $date = Carbon::create((int) $year, (int) $month, 1);
+        $balances = Leave::replayBalances($date, $user);
+
+
+
+        return response()->json([
+            'balances' => $balances,
+            'date' => $date->format('Y-m-d')
+        ]);
     }
 
     /**

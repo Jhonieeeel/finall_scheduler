@@ -29,8 +29,26 @@ class DatabaseSeeder extends Seeder
             'event_type' => 'accrual',
             'event_tag' => null,
             'balance' => 5.584,
-            'starts_at' => '2022-12-01',
-            'ends_at' => '2022-12-31'
+            'starts_at' => '2023-01-01',
+            'ends_at' => '2023-01-31'
+        ]);
+        Leave::create([
+            'user_id' => 1,
+            'leave_type' => 'sick leave',
+            'event_type' => 'accrual',
+            'event_tag' => null,
+            'balance' => 10.792,
+            'starts_at' => '2023-01-01',
+            'ends_at' => '2023-01-31'
+        ]);
+        Leave::create([
+            'user_id' => 1,
+            'leave_type' => 'force leave',
+            'event_type' => 'accrual',
+            'event_tag' => null,
+            'balance' => 5,
+            'starts_at' => '2023-01-01',
+            'ends_at' => '2023-01-31'
         ]);
     }
 }

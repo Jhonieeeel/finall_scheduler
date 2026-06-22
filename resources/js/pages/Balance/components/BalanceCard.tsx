@@ -1,74 +1,111 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CalendarDays, Wallet, TrendingDown } from 'lucide-react';
+import {
+    CalendarDays,
+    Wallet,
+    TrendingDown,
+    Stethoscope,
+    AlertTriangle,
+} from 'lucide-react';
 
 type LeaveCardProps = {
-    leave_type: string;
-    current_balance: number;
-    used: number;
-    next_balance: number;
+    data: {
+        leave_type: string;
+        currentBalance: number;
+        usedBalance: number;
+        estimatedBalance: number | null;
+    };
 };
 
-export default function BalanceCard({
-    leave_type,
-    current_balance,
-    used,
-    next_balance,
-}: LeaveCardProps) {
+const leaveConfig: Record<string, { icon: React.ReactNode; accent: string }> = {
+    'vacation leave': {
+        icon: <CalendarDays className="size-4 text-sky-500" />,
+        accent: 'bg-sky-400',
+    },
+    'sick leave': {
+        icon: <Stethoscope className="size-4 text-sky-500" />,
+        accent: 'bg-sky-400',
+    },
+    'force leave': {
+        icon: <AlertTriangle className="size-4 text-slate-400" />,
+        accent: 'bg-slate-400',
+    },
+};
+
+export default function BalanceCard({ data }: LeaveCardProps) {
+    const config =
+        leaveConfig[data.leave_type] ?? leaveConfig['vacation leave'];
+    const isForceLeave = data.leave_type === 'force leave';
+    const unused = 5 - data.usedBalance;
+
     return (
-        <Card className="transition-shadow hover:shadow-md">
-            <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-base">
-                        <CalendarDays className="size-4" />
-                        {leave_type}
-                    </CardTitle>
+        <div className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-md">
+            {/* accent bar */}
+            <div className={`h-1 w-full ${config.accent}`} />
 
-                    <Badge variant="secondary">{next_balance} Days Left</Badge>
+            {/* header */}
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground capitalize">
+                    {config.icon}
+                    {data.leave_type}
                 </div>
-            </CardHeader>
+                {isForceLeave ? (
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+                        Fixed: 5 days
+                    </span>
+                ) : (
+                    <span className="rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700">
+                        +1.25 next mo.
+                    </span>
+                )}
+            </div>
 
-            <CardContent className="space-y-4">
-                <div>
-                    <p className="text-sm text-muted-foreground">
-                        Available Balance
-                    </p>
+            {/* body */}
+            <div className="p-4">
+                <p
+                    className={`text-3xl font-medium ${isForceLeave ? 'text-slate-500' : 'text-sky-600'}`}
+                >
+                    {data.currentBalance.toFixed(3)}
+                </p>
+                <p className="mb-4 text-xs text-muted-foreground">
+                    Available balance
+                </p>
 
-                    <p className="text-3xl font-bold">{current_balance}</p>
-                </div>
-
-                <div className="space-y-3">
+                <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2 text-muted-foreground">
-                            <Wallet className="size-4" />
-                            Current
+                            <Wallet className="size-4" /> Current
                         </div>
-
-                        <span className="font-medium">{current_balance}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                            <TrendingDown className="size-4" />
-                            Used
-                        </div>
-
-                        <span className="font-medium text-destructive">
-                            -{used}
+                        <span className="font-medium">
+                            {data.currentBalance.toFixed(3)}
                         </span>
                     </div>
 
-                    <div className="border-t pt-3">
-                        <div className="flex items-center justify-between">
-                            <span className="font-medium">Remaining</span>
-
-                            <span className="text-lg font-bold">
-                                {next_balance}
-                            </span>
+                    <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <TrendingDown className="size-4" /> Used
                         </div>
+                        <span className="font-medium text-destructive">
+                            -{data.usedBalance.toFixed(0)}
+                        </span>
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+
+                <hr className="my-3 border-border" />
+
+                <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                        {isForceLeave
+                            ? 'Unused (deducts VL)'
+                            : 'Est. next month'}
+                    </span>
+                    <span
+                        className={`text-base font-medium ${isForceLeave ? 'text-destructive' : 'text-sky-600'}`}
+                    >
+                        {isForceLeave
+                            ? unused.toFixed(3)
+                            : (data.estimatedBalance?.toFixed(3) ?? '—')}
+                    </span>
+                </div>
+            </div>
+        </div>
     );
 }

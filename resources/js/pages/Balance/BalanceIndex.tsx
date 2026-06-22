@@ -1,9 +1,17 @@
 import balance from '@/routes/balance';
-import { Head } from '@inertiajs/react';
-import LeaveForm from '../Leave/LeaveForm';
-import BalanceCard from './components/BalanceCard';
+import { User } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
+import { UserColumns } from './columns/UserColumns';
+import { BalanceIndexTable } from './table/BalanceIndexTable';
+import FilterButton from './components/FilterButton';
+
+type PageProps = {
+    users: User[];
+};
 
 export default function BalanceIndex() {
+    const { users } = usePage<PageProps>().props;
+
     return (
         <>
             <Head title="Balance" />
@@ -16,8 +24,9 @@ export default function BalanceIndex() {
                         departments.
                     </p>
                 </div>
+                <div></div>
                 <div className="min-h-100vh relative flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    {/* <BalanceCard  /> */}
+                    <BalanceIndexTable columns={UserColumns} data={users} />
                 </div>
             </div>
         </>

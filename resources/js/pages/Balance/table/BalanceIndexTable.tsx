@@ -19,7 +19,7 @@ interface DataTableProps<TData, TValue> {
     data: TData[];
 }
 
-export function BalanceTable<TData, TValue>({
+export function BalanceIndexTable<TData, TValue>({
     columns,
     data,
 }: DataTableProps<TData, TValue>) {

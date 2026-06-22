@@ -14,10 +14,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get("leave", [LeaveController::class, 'index'])->name('leave.index');
 
     // Balance
-    Route::get("balamce", [BalanceController::class, "index"])->name('balance.index');
+    Route::get("balance", [BalanceController::class, "index"])->name('balance.index');
+    Route::get("balance/create", [BalanceController::class, 'store'])->name('balance.store');
+    Route::get('/balances/user/{user}', [BalanceController::class, 'show'])->name('balance.show');
+    Route::get('/balances/user/{user}/data', [BalanceController::class, 'data'])->name('balance.data');
 
-    // Undertime
+    // Undertimen
     Route::get("undertime", [UndertimeController::class, 'index'])->name('undertime.index');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
