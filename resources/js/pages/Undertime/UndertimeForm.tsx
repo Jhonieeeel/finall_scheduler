@@ -187,6 +187,7 @@ export default function UndertimeForm() {
                         <ToggleGroup
                             type="single"
                             value={form.data.event_tag}
+                            disabled={!form.data.user_id}
                             onValueChange={(value) =>
                                 value && form.setData('event_tag', value)
                             }
@@ -277,6 +278,7 @@ export default function UndertimeForm() {
                                 </FieldLabel>
                                 <Input
                                     type="time"
+                                    disabled={!form.data.ends_at}
                                     id="time-picker-optional"
                                     onChange={(e) => setTime(e.target.value)}
                                     value={time}

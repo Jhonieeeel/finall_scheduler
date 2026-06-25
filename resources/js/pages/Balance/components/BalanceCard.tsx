@@ -35,7 +35,11 @@ export default function BalanceCard({ data }: LeaveCardProps) {
     const config =
         leaveConfig[data.leave_type] ?? leaveConfig['vacation leave'];
     const isForceLeave = data.leave_type === 'force leave';
-    const unused = 5 - data.usedBalance;
+    const unused = isForceLeave
+        ? data.currentBalance.toFixed(1)
+        : data?.estimatedBalance?.toFixed(3);
+
+    console.log(unused);
 
     return (
         <div className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-md">
@@ -76,7 +80,7 @@ export default function BalanceCard({ data }: LeaveCardProps) {
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <Wallet className="size-4" /> Previous
                         </div>
-                        <span className="font-medium">
+                        <span className="font-medium text-yellow-600">
                             {data.previousBalance.toFixed(3)}
                         </span>
                     </div>
@@ -109,9 +113,7 @@ export default function BalanceCard({ data }: LeaveCardProps) {
                     <span
                         className={`text-base font-medium ${isForceLeave ? 'text-destructive' : 'text-sky-600'}`}
                     >
-                        {isForceLeave
-                            ? unused.toFixed(3)
-                            : (data.estimatedBalance?.toFixed(3) ?? '—')}
+                        {unused}
                     </span>
                 </div>
             </div>

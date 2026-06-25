@@ -13,11 +13,13 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import balance from '@/routes/balance';
+import calendar from '@/routes/calendar';
 import leave from '@/routes/leave';
 import undertime from '@/routes/undertime';
 import type { MainNav } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
+    Calendar1Icon,
     CalendarArrowUp,
     LayoutGrid,
     ListOrdered,
@@ -26,7 +28,7 @@ import {
 
 const mainNavItems: MainNav[] = [
     {
-        groupLabel: 'Platform',
+        groupLabel: 'Dashboard',
         items: [
             {
                 title: 'Dashboard',
@@ -36,7 +38,7 @@ const mainNavItems: MainNav[] = [
         ],
     },
     {
-        groupLabel: 'Tracking',
+        groupLabel: 'Leave Management',
         items: [
             {
                 title: 'Balances',
@@ -52,6 +54,16 @@ const mainNavItems: MainNav[] = [
                 title: 'File Undertime',
                 href: undertime.index(),
                 icon: TimerOff,
+            },
+        ],
+    },
+    {
+        groupLabel: 'Planning',
+        items: [
+            {
+                title: 'Schedule',
+                href: calendar.index(),
+                icon: Calendar1Icon,
             },
         ],
     },

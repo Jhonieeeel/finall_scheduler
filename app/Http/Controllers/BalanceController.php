@@ -56,10 +56,12 @@ class BalanceController extends Controller
         $date  = Carbon::create((int) $year, (int) $month, 1)->startOfMonth();
 
         $balances = Leave::replayBalances($date, $user);
+        $hasNextAccrual = Leave::hasNextMonthAccrual($user, $date);
 
         return response()->json([
             'balances' => $balances,
             'date'     => $date->format('Y-m-d'),
+            'hasNext'  => $hasNextAccrual
         ]);
     }
 

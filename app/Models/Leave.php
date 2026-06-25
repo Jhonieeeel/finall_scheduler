@@ -38,6 +38,19 @@ class Leave extends Model
             ->sum('balance');
     }
 
+
+    public static function hasNextMonthAccrual(User $user, Carbon $date): bool
+    {
+        return self::query()
+            ->fromUser($user)
+            ->where('event_type', 'accrual')
+            ->whereBetween('starts_at', [
+                $date->copy()->addMonth()->startOfMonth(),
+                $date->copy()->addMonth()->endOfMonth(),
+            ])
+            ->exists();
+    }
+
     public static function forceLeaveRule(Collection $forceLeaveEvents, array $balances, Carbon $date): array
     {
         $fixedFL     = 5;
@@ -47,8 +60,11 @@ class Leave extends Model
             ->where('event_type', 'accrual')
             ->map(fn($e) => Carbon::parse($e->starts_at)->year)
             ->unique()
-            ->filter(fn($year) => $year < $currentYear)
+            ->filter(fn($year) => $year < $currentYear
+                || ($year === $currentYear && $date->month === 12))
             ->values();
+
+        $result = $balances;
 
         foreach ($flAccrualYears as $year) {
 
@@ -59,20 +75,16 @@ class Leave extends Model
 
             $flUnused = max(0, $fixedFL - abs($flUsedThatYear));
 
-
-            foreach ($balances as &$balance) {
-                info($balance);
-                info($balance['currentBalance'] -= $flUnused);
+            $result = array_map(function ($balance) use ($flUnused) {
                 if ($balance['leave_type'] === 'vacation leave') {
-                    $balance['currentBalance'] -= $flUnused;
+                    $balance['currentBalance']  -= $flUnused;
                     $balance['estimatedBalance'] = $balance['currentBalance'] + 1.25;
-
-                    info("LeaveType: {$balance['leave_type']} Estim: {$balance['estimatedBalance']}");
                 }
-            }
+                return $balance;
+            }, $result);
         }
 
-        return $balances;
+        return $result;
     }
 
     public static function replayBalances(Carbon $date, User $user): array
@@ -93,7 +105,7 @@ class Leave extends Model
             ->get()
             ->groupBy('leave_type');
 
-        $balances = collect($leaveTypes)->map(function ($type) use ($currentEvents, $prevEvents) {
+        $balances = collect($leaveTypes)->map(function ($type) use ($currentEvents, $prevEvents, $date) {
 
             $current  = $currentEvents->get($type, collect());
             $previous = $prevEvents->get($type, collect());
@@ -104,25 +116,37 @@ class Leave extends Model
             $taggedAsVLPrevious = $prevEvents->get('force leave', collect())
                 ->where('event_tag', 'vacation leave');
 
-            $currentBalance  = $type === 'vacation leave'
-                ? $current->sum('balance') + $taggedAsVLCurrent->sum('balance')
-                : $current->sum('balance');
+            $currentBalance = match ($type) {
+                'vacation leave' => $current->sum('balance') + $taggedAsVLCurrent->sum('balance'),
+                'force leave'    => $current
+                    ->filter(fn($e) => Carbon::parse($e->starts_at)->year === $date->year)
+                    ->sum('balance'),
+                default          => $current->sum('balance'),
+            };
 
-            $previousBalance = $previous->sum('balance');
-
-            if ($type === 'vacation leave') {
-                $previousBalance += $taggedAsVLPrevious->sum('balance') + 1.25;
-            }
-
-            if ($type === 'sick leave') {
-                $previousBalance += 1.25;
-            }
+            $previousBalance = match ($type) {
+                'vacation leave' => $previous->sum('balance') + $taggedAsVLPrevious->sum('balance') + 1.25,
+                'sick leave'     => $previous->sum('balance') + 1.25,
+                'force leave'    => $previous
+                    ->filter(fn($e) => Carbon::parse($e->starts_at)->year === $date->year)
+                    ->sum('balance'),
+                default          => $previous->sum('balance'),
+            };
 
             return [
-                'leave_type'       => $type,
-                'previousBalance'  => $previousBalance,
-                'currentBalance'   => $currentBalance,
-                'usedBalance'      => abs($current->where('event_tag', null)->where('balance', '<', 0)->sum('balance')),
+                'leave_type'      => $type,
+                'previousBalance' => $previousBalance,
+                'currentBalance'  => $currentBalance,
+                'usedBalance'     => $type === 'force leave'
+                    ? abs($current->where('event_type', 'deduction')
+                        ->filter(fn($e) => Carbon::parse($e->starts_at)->month === $date->month
+                            && Carbon::parse($e->starts_at)->year  === $date->year)
+                        ->sum('balance'))
+                    : abs($current->where('event_tag', null)
+                        ->where('balance', '<', 0)
+                        ->filter(fn($e) => Carbon::parse($e->starts_at)->month === $date->month
+                            && Carbon::parse($e->starts_at)->year  === $date->year)
+                        ->sum('balance')),
                 'estimatedBalance' => in_array($type, ['vacation leave', 'sick leave'])
                     ? $currentBalance + 1.25
                     : null,

@@ -2,7 +2,8 @@ import { Spinner } from '@/components/ui/spinner';
 import { User } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useQuery } from '@tanstack/react-query';
-import { addMonths, format } from 'date-fns';
+import { format } from 'date-fns';
+import { Calendar1Icon } from 'lucide-react';
 import { useState } from 'react';
 import AccumulateButton from './components/AccumulateButton';
 import BalanceCard from './components/BalanceCard';
@@ -19,6 +20,7 @@ type BalanceResponse = {
         usedBalance: number;
         estimatedBalance: number;
     };
+    hasNext: boolean;
 };
 
 export default function UserBalance() {
@@ -41,6 +43,7 @@ export default function UserBalance() {
 
     const balanceItems = balances?.balances ?? [];
     const filteredDate = balances?.date ?? null;
+    const hasNextAccrual = balances?.hasNext;
 
     return (
         <>
@@ -49,8 +52,8 @@ export default function UserBalance() {
                 <div className="flex items-start justify-between">
                     <div className="flex w-full items-center justify-between">
                         <div>
-                            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight text-sky-500">
-                                {monthName}
+                            <h3 className="flex scroll-m-20 items-center gap-1.5 text-2xl font-semibold tracking-tight text-sky-600">
+                                <Calendar1Icon /> {monthName} {year}
                             </h3>
 
                             <h1 className="text-4xl font-bold">
@@ -65,6 +68,13 @@ export default function UserBalance() {
                         </div>
 
                         <div className="flex items-center gap-4">
+                            {!hasNextAccrual && (
+                                <AccumulateButton
+                                    key={filteredDate}
+                                    user={user}
+                                    date={filteredDate}
+                                />
+                            )}
                             <FilterButton
                                 month={month}
                                 year={year}
@@ -72,13 +82,6 @@ export default function UserBalance() {
                                 onYearChange={setYear}
                             />
                         </div>
-                        {filteredDate && (
-                            <AccumulateButton
-                                key={filteredDate}
-                                user={user}
-                                date={filteredDate}
-                            />
-                        )}
                     </div>
                 </div>
 

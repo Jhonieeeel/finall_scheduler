@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BalanceController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\UndertimeController;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Undertimen
     Route::get("undertime", [UndertimeController::class, 'index'])->name('undertime.index');
     Route::post("undertime", [UndertimeController::class, 'store'])->name('undertime.store');
+
+    // Calendar
+    Route::get("calendar", [CalendarController::class, 'index'])->name('calendar.index');
 });
 
 require __DIR__ . '/settings.php';

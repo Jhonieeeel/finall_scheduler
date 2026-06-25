@@ -24,7 +24,6 @@ export default function BalanceIndex() {
                         departments.
                     </p>
                 </div>
-                <div></div>
                 <div className="min-h-100vh relative flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
                     <BalanceIndexTable columns={UserColumns} data={users} />
                 </div>
