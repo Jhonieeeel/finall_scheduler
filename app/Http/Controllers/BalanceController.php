@@ -55,13 +55,15 @@ class BalanceController extends Controller
         $year  = request()->input('year', now()->year);
         $date  = Carbon::create((int) $year, (int) $month, 1)->startOfMonth();
 
-        $balances = Leave::replayBalances($date, $user);
+        $replayBalances = Leave::replayBalances($date, $user);
         $hasNextAccrual = Leave::hasNextMonthAccrual($user, $date);
+        $transactions   = Leave::transactionPerMonth($user, $date);
 
         return response()->json([
-            'balances' => $balances,
+            'balances' => $replayBalances,
             'date'     => $date->format('Y-m-d'),
-            'hasNext'  => $hasNextAccrual
+            'hasNext'  => $hasNextAccrual,
+            'transactions' => $transactions
         ]);
     }
 
@@ -84,8 +86,13 @@ class BalanceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Leave $leave)
     {
-        //
+
+        $user = $leave->user;
+
+        $leave->delete();
+
+        return to_route('balance.show', $user)->with('message', 'Leave deleted successfully');
     }
 }

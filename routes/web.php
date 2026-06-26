@@ -21,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get("balance/create", [BalanceController::class, 'store'])->name('balance.store');
     Route::get('/balances/user/{user}', [BalanceController::class, 'show'])->name('balance.show');
     Route::get('/balances/user/{user}/data', [BalanceController::class, 'data'])->name('balance.data');
+    Route::delete('/balances/delete', [BalanceController::class, 'destroy'])->name('balance.destroy');
 
     // Undertimen
     Route::get("undertime", [UndertimeController::class, 'index'])->name('undertime.index');
@@ -28,6 +29,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Calendar
     Route::get("calendar", [CalendarController::class, 'index'])->name('calendar.index');
+    // Calendar Data
+    Route::get("/calendar/events/data", [LeaveController::class, 'data'])->name('calendar.data');
 });
 
 require __DIR__ . '/settings.php';

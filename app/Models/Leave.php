@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Data\LeaveData;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
@@ -19,6 +20,11 @@ class Leave extends Model
         'balance',
         'starts_at',
         'ends_at'
+    ];
+
+    protected $casts = [
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime'
     ];
 
     public function user(): BelongsTo
@@ -38,6 +44,38 @@ class Leave extends Model
             ->sum('balance');
     }
 
+    public static function calendarData()
+    {
+        return self::query()->with("user:id,name")->where('event_type', 'deduction')
+            ->whereNotIn('event_tag', ['tardiness', 'undertime'])
+            ->select([
+                'id',
+                'user_id',
+                'leave_type',
+                'starts_at',
+                'ends_at',
+            ])
+            ->get()
+            ->map(function ($leave) {
+                return [
+                    'id'      => (string) $leave->id,
+                    'user_id' => $leave->user_id,
+                    'title'   => $leave->leave_type,
+                    'start'   => Carbon::parse($leave->starts_at)->format('Y-m-d'),
+                    'end'     => Carbon::parse($leave->ends_at)->format('Y-m-d'),
+                    'status'  => $leave->status,
+                    'user'    => $leave->user
+                ];
+            });
+    }
+
+    public static function transactionPerMonth(?User $user, Carbon $date)
+    {
+        return self::query()->fromUser($user)
+            ->whereMonth('starts_at', $date->month)
+            ->whereYear('starts_at', $date->year)
+            ->get();
+    }
 
     public static function hasNextMonthAccrual(User $user, Carbon $date): bool
     {

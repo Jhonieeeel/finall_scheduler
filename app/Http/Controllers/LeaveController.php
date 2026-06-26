@@ -19,6 +19,13 @@ class LeaveController extends Controller
         return Inertia::render("Leave/LeaveIndex", ['users' => User::select(['id', 'name'])->get()]);
     }
 
+    public function data()
+    {
+        return response()->json([
+            'calendarEvents' => Leave::calendarData() // this returns a Collection
+        ]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

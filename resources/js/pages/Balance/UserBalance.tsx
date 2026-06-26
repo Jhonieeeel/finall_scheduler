@@ -5,10 +5,12 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { Calendar1Icon } from 'lucide-react';
 import { useState } from 'react';
+import { BalanceColumns } from './columns/BalanceColumns';
 import AccumulateButton from './components/AccumulateButton';
 import BalanceCard from './components/BalanceCard';
 import FilterButton from './components/FilterButton';
 import { fetchBalances } from './data/fetchData';
+import { BalanceIndexTable } from './table/BalanceIndexTable';
 
 type PageProps = { user: User };
 
@@ -21,6 +23,7 @@ type BalanceResponse = {
         estimatedBalance: number;
     };
     hasNext: boolean;
+    transactions: [];
 };
 
 export default function UserBalance() {
@@ -32,19 +35,16 @@ export default function UserBalance() {
     const currentDate = new Date(Number(year), Number(month) - 1, 1);
     const monthName = format(currentDate, 'MMMM');
 
-    const filteredMonth = format(currentDate, 'yyyy-MM-dd');
-
     const { data: balances, isLoading } = useQuery<BalanceResponse>({
         queryKey: ['balances', user.id, month, year],
         queryFn: () => fetchBalances(month, year, user.id),
     });
 
-    console.log(balances);
-
     const balanceItems = balances?.balances ?? [];
     const filteredDate = balances?.date ?? null;
     const hasNextAccrual = balances?.hasNext;
 
+    console.log(balances?.transactions);
     return (
         <>
             <Head title="Balance" />
@@ -96,6 +96,12 @@ export default function UserBalance() {
                         ))}
                     </div>
                 )}
+                <div>
+                    <BalanceIndexTable
+                        columns={BalanceColumns}
+                        data={balances?.transactions ?? []}
+                    />
+                </div>
             </div>
         </>
     );

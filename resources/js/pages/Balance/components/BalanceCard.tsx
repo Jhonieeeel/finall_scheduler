@@ -39,8 +39,6 @@ export default function BalanceCard({ data }: LeaveCardProps) {
         ? data.currentBalance.toFixed(1)
         : data?.estimatedBalance?.toFixed(3);
 
-    console.log(unused);
-
     return (
         <div className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-md">
             {/* accent bar */}
