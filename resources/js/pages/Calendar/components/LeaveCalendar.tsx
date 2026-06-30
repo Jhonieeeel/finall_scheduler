@@ -1,15 +1,14 @@
+import { fetchCalendarEvents } from '@/pages/Balance/data/fetchData';
+import { User } from '@/types';
 import { createViewMonthGrid } from '@schedule-x/calendar';
-import { createEventModalPlugin } from '@schedule-x/event-modal';
 import { createEventsServicePlugin } from '@schedule-x/events-service';
 import { ScheduleXCalendar, useCalendarApp } from '@schedule-x/react';
 import '@schedule-x/theme-default/dist/index.css';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import 'temporal-polyfill/global';
 import CustomEventModal from './CustomEventModal';
-import { User } from '@/types';
-import { usePage } from '@inertiajs/react';
-import { useQuery } from '@tanstack/react-query';
-import { fetchCalendarEvents } from '@/pages/Balance/data/fetchData';
+import { calendarConfig } from '../constants/Contants';
 
 type EventProp = {
     id: number;
@@ -19,6 +18,8 @@ type EventProp = {
     user_id: number;
     user: User;
     status: boolean;
+    calendarTitle: string;
+    calendarId: string;
 };
 
 export default function LeaveCalendar() {
@@ -31,7 +32,7 @@ export default function LeaveCalendar() {
 
     const [open, setOpen] = useState(false);
 
-    const [event, setEvent] = useState({
+    const [event, setEvent] = useState<EventProp>({
         id: 0,
         title: '',
         start: '',
@@ -39,20 +40,28 @@ export default function LeaveCalendar() {
         user: [],
         status: false,
         user_id: 0,
+        calendarTitle: '',
+        calendarTheme: '',
     });
 
     const calendar = useCalendarApp({
         views: [createViewMonthGrid()],
         events: [],
+        calendars: calendarConfig,
+        monthGridOptions: {
+            nEventsPerDay: 50,
+        },
         callbacks: {
             onEventClick(event) {
                 setEvent({
                     id: event.id,
-                    title: event.title ?? '',
+                    title: event.calendarTitle ?? '',
                     start: event.start.toString(),
                     end: event.end.toString(),
                     user_id: event.user_id,
                     user: event.user,
+                    calendarTitle: event.calendarTitle,
+                    calendarTheme: calendarConfig[event.calendarId],
                 });
 
                 setOpen(true);
@@ -73,6 +82,7 @@ export default function LeaveCalendar() {
 
             {event && (
                 <CustomEventModal
+                    tModal
                     open={open}
                     onOpenChange={setOpen}
                     calendarEvent={event}

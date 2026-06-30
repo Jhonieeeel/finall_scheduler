@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class Leave extends Model
 {
@@ -60,11 +61,13 @@ class Leave extends Model
                 return [
                     'id'      => (string) $leave->id,
                     'user_id' => $leave->user_id,
-                    'title'   => $leave->leave_type,
+                    'title'   => $leave->user->name, // title: UserName
                     'start'   => Carbon::parse($leave->starts_at)->format('Y-m-d'),
                     'end'     => Carbon::parse($leave->ends_at)->format('Y-m-d'),
                     'status'  => $leave->status,
-                    'user'    => $leave->user
+                    'user'    => $leave->user,
+                    'calendarTitle' => $leave->leave_type, // Force leave
+                    'calendarId' => $leave->leave_type // Force Leave
                 ];
             });
     }
