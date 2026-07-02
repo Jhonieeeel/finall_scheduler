@@ -26,6 +26,7 @@ export default function LeaveCalendar() {
     const { data: calendarEvents, isLoading } = useQuery<EventProp[]>({
         queryKey: ['calendarEvents'],
         queryFn: fetchCalendarEvents,
+        staleTime: 10000,
     });
     console.log(calendarEvents);
     const eventService = useState(() => createEventsServicePlugin())[0];

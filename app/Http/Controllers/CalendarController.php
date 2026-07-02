@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Leave;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -60,8 +61,14 @@ class CalendarController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Leave $leave)
     {
-        //
+        $leave->delete();
+
+        Inertia::flash([
+            'message' => 'Leave deleted successfully!'
+        ]);
+
+        return to_route('calendar.index');
     }
 }

@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Calendar
     Route::get("calendar", [CalendarController::class, 'index'])->name('calendar.index');
+    Route::delete("calendar/{leave}", [CalendarController::class, 'destroy'])->name('calendar.destroy');
     // Calendar Data
     Route::get("/calendar/events/data", [LeaveController::class, 'data'])->name('calendar.data');
 });

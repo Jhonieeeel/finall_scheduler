@@ -9,9 +9,10 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
+import calendar from '@/routes/calendar';
+import { useForm } from '@inertiajs/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
-import React from 'react';
 
 export default function DeleteDialog() {
     return (
@@ -31,7 +32,9 @@ export default function DeleteDialog() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction>Continue</AlertDialogAction>
+                    <AlertDialogAction onClick={handleDelete}>
+                        Continue
+                    </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

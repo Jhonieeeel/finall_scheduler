@@ -12,6 +12,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { User } from '@/types';
 import { CalendarCheck, CalendarDays, Pencil, Trash2 } from 'lucide-react';
+import DeleteDialog from './DeleteDialog';
+import { useForm } from '@inertiajs/react';
+import calendar from '@/routes/calendar';
+import { useQueryClient } from '@tanstack/react-query';
 
 type Props = {
     open: boolean;
@@ -62,10 +66,26 @@ export default function ViewEvent({
     const start = formatDate(calendarEvent.start);
     const end = formatDate(calendarEvent.end);
 
+    const deleteForm = useForm({
+        id: Number(calendarEvent?.id),
+    });
+
+    const queryClient = useQueryClient();
+
+    function handleDelete(e: React.MouseEvent) {
+        e.preventDefault();
+        deleteForm.submit(calendar.destroy(deleteForm.data.id), {
+            onSuccess: () => {
+                queryClient.invalidateQueries({
+                    queryKey: ['calendarEvents'],
+                });
+                onOpenChange(false);
+            },
+        });
+    }
+
     return (
         <>
-            {/* View */}
-
             {/* Title badge */}
             <div className="border-b px-5 py-3.5">
                 <span
@@ -136,7 +156,9 @@ export default function ViewEvent({
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction>Continue</AlertDialogAction>
+                                <AlertDialogAction onClick={handleDelete}>
+                                    Continue
+                                </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
